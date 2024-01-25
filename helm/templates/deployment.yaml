@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: {{ .Values.deployment.name }}
+  name: {{ .Values.deployment.name }}
+spec:
+  selector:
+    matchLabels:
+      service: {{ .Values.deployment.name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.deployment.name }}
+    spec:
+      serviceAccountName: {{ .Values.cagent.serviceAccountName }}
+      containers:
+      - env:
+        - name: consulHost
+          value: {{quote .Values.cagent.consulHost }}
+        - name: consulToken
+          value: {{ quote .Values.cagent.consulToken }} 
+        - name: executorInitialDelay
+          value: {{ quote .Values.cagent.executorInitialDelay }}
+        - name: executorExecutionInterval
+          value: {{ quote .Values.cagent.executorExecutionInterval }}
+        - name: labelsToFilter
+          value: {{ quote .Values.cagent.labelsToFilter }}       
+        image: {{ .Values.image.repository }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        name: {{ .Values.deployment.name }}
+        resources: {}
+      restartPolicy: Always
+

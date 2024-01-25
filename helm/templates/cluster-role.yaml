@@ -1,0 +1,9 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Values.cagent.namespace }}
+  name: {{ .Values.cluster.role.name }}
+rules:
+- apiGroups: ["networking.k8s.io", "apps", ""]
+  resources: ["services", "endpoints", "ingresses", "deployments"]
+  verbs: ["get", "watch", "list"]

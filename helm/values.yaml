@@ -1,0 +1,29 @@
+
+deployment:
+  name: cagent
+
+cluster:
+    role:
+      binding:
+        name: cagent-reader-binding
+      name: cagent-reader
+
+image:
+  repository: surisoft/cagent:1.0.0
+  pullPolicy: Always
+
+cagent:
+  namespace:
+  consulHost: 
+  consulToken:  
+  executorInitialDelay: 5
+  executorExecutionInterval: 5  
+  labelsToFilter: capi
+  serviceAccountName: capi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 60
+
