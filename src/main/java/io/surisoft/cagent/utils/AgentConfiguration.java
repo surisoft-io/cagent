@@ -13,15 +13,15 @@ public class AgentConfiguration {
                 System.getenv(Constants.CONSUL_HOST_ENV_PROPERTY) == null ?
                         Constants.CONSUL_HOST_DEFAULT :
                         System.getenv(Constants.CONSUL_HOST_ENV_PROPERTY));
-        agentEnvironment.setConsulHost(
+        agentEnvironment.setConsulToken(
                 System.getenv(Constants.CONSUL_TOKEN_ENV_PROPERTY) == null ?
                         null :
-                        System.getenv(Constants.CONSUL_HOST_ENV_PROPERTY));
+                        System.getenv(Constants.CONSUL_TOKEN_ENV_PROPERTY));
         agentEnvironment.setExecutorInitialDelay(
                 System.getenv(Constants.EXECUTOR_INITIAL_DELAY_ENV_PROPERTY) == null ?
                         Constants.EXECUTOR_INITIAL_DELAY_DEFAULT :
                         Integer.parseInt(System.getenv(Constants.EXECUTOR_INITIAL_DELAY_ENV_PROPERTY)));
-        agentEnvironment.setExecutorExecutionDelay(
+        agentEnvironment.setExecutorExecutionInterval(
                 System.getenv(Constants.EXECUTOR_EXECUTION_INTERVAL_ENV_PROPERTY) == null ?
                         Constants.EXECUTOR_EXECUTION_INTERVAL_DEFAULT :
                         Integer.parseInt(System.getenv(Constants.EXECUTOR_EXECUTION_INTERVAL_ENV_PROPERTY)));

@@ -5,6 +5,7 @@ import io.kubernetes.client.util.Config;
 import io.surisoft.cagent.schema.AgentEnvironment;
 import io.surisoft.cagent.service.ConsulService;
 import io.surisoft.cagent.utils.AgentConfiguration;
+import io.surisoft.cagent.utils.ServiceUtils;
 import org.slf4j.*;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ public class CapiKubernetesAgent {
             logger.info("Creating Agent Configuration");
             AgentConfiguration agentConfiguration = new AgentConfiguration();
             AgentEnvironment agentEnvironment = agentConfiguration.buildAgentEnvironment();
+            ServiceUtils serviceUtils = new ServiceUtils();
 
             logger.info("Creating Consul Service");
             ConsulService consulService = agentConfiguration.createConsulService(agentEnvironment);
@@ -27,8 +29,8 @@ public class CapiKubernetesAgent {
             ApiClient apiClient = Config.defaultClient();
 
             logger.info("Starting Agent Executor...");
-            AgentExecutor agentExecutor = new AgentExecutor();
-            agentExecutor.start(apiClient, agentEnvironment, consulService);
+            AgentExecutor agentExecutor = new AgentExecutor(apiClient, agentEnvironment, consulService, serviceUtils);
+            agentExecutor.start();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }

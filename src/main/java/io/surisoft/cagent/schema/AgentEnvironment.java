@@ -55,10 +55,6 @@ public class AgentEnvironment {
         return executorExecutionInterval;
     }
 
-    public void setExecutorExecutionDelay(int executorExecutionInterval) {
-        this.executorExecutionInterval = executorExecutionInterval;
-    }
-
     public void setExecutorExecutionInterval(int executorExecutionInterval) {
         this.executorExecutionInterval = executorExecutionInterval;
     }
