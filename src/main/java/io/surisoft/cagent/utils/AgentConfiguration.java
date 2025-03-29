@@ -1,9 +1,10 @@
 package io.surisoft.cagent.utils;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import io.surisoft.cagent.schema.AgentEnvironment;
 import io.surisoft.cagent.service.ConsulService;
 import okhttp3.OkHttpClient;
-
 import java.util.List;
 
 public class AgentConfiguration {
@@ -25,10 +26,19 @@ public class AgentConfiguration {
                 System.getenv(Constants.EXECUTOR_EXECUTION_INTERVAL_ENV_PROPERTY) == null ?
                         Constants.EXECUTOR_EXECUTION_INTERVAL_DEFAULT :
                         Integer.parseInt(System.getenv(Constants.EXECUTOR_EXECUTION_INTERVAL_ENV_PROPERTY)));
-        agentEnvironment.setLabelsToFilter(
-                System.getenv(Constants.LABELS_TO_FILTER_ENV_PROPERTY) == null ?
-                        Constants.LABELS_TO_FILTER_DEFAULT :
-                        List.of(System.getenv(Constants.LABELS_TO_FILTER_ENV_PROPERTY)));
+        agentEnvironment.setNamespace(
+                System.getenv(Constants.NAMESPACE) == null ?
+                        null :
+                        System.getenv(Constants.NAMESPACE));
+        agentEnvironment.setListenForServices(
+                System.getenv(Constants.DISCOVER_SERVICES) != null && Boolean.parseBoolean(System.getenv(Constants.DISCOVER_SERVICES)));
+        agentEnvironment.setDefaultLogLevel(
+                System.getenv(Constants.LOG_LEVEL) == null ?
+                        "INFO":
+                        System.getenv(Constants.LOG_LEVEL));
+
+        Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.valueOf(agentEnvironment.getDefaultLogLevel()));
         return agentEnvironment;
     }
 

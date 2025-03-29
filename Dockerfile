@@ -1,10 +1,32 @@
-FROM openjdk:21-slim-bullseye
+# Stage 1: Build the application
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
-# Set the working directory in the container
-#WORKDIR /app
+# Set working directory
+WORKDIR /app
+ARG CAGENT_VERSION
 
-# Copy the JAR file into the container
-COPY target/cagent-1.0.0-jar-with-dependencies.jar app.jar
+# Copy Maven wrapper and project files
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
 
-# Run the application when the container starts
-CMD ["java", "-jar", "app.jar"]
+# Download dependencies (cache layer)
+RUN ./mvnw dependency:go-offline
+
+# Copy the source code
+COPY src ./src
+
+# Build the application
+RUN ./mvnw package -DskipTests
+
+# Stage 2: Create a lightweight runtime image
+FROM eclipse-temurin:21-jre-alpine
+ARG CAGENT_VERSION
+
+# Set working directory
+WORKDIR /app
+
+# Copy the built jar file from the builder stage
+COPY --from=builder /app/target/cagent-${CAGENT_VERSION}-jar-with-dependencies.jar app.jar
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]

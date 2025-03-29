@@ -4,6 +4,7 @@ metadata:
   labels:
     service: {{ .Values.deployment.name }}
   name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.cagent.namespace }}
 spec:
   selector:
     matchLabels:
@@ -27,7 +28,17 @@ spec:
         - name: executorExecutionInterval
           value: {{ quote .Values.cagent.executorExecutionInterval }}
         - name: labelsToFilter
-          value: {{ quote .Values.cagent.labelsToFilter }}       
+          value: {{ quote .Values.cagent.labelsToFilter }}
+        - name: org.slf4j.simpleLogger.defaultLogLevel
+          value: debug
+        - name: namespace
+          value: {{ .Values.cagent.namespace }}
+        - name: discoverServices
+          value: {{ quote .Values.cagent.discoverServices }}
+        - name: cagent.upgrade
+          value:  {{ .Values.cagent.upgrade }}
+        - name: defaultLogLevel
+          value: {{ .Values.cagent.defaultLogLevel }}
         image: {{ .Values.image.repository }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: {{ .Values.deployment.name }}

@@ -9,21 +9,22 @@ cluster:
       name: cagent-reader
 
 image:
-  repository: surisoft/cagent:1.0.0
+  repository: surisoft/cagent:2.0.0
   pullPolicy: Always
 
 cagent:
-  namespace:
-  consulHost: 
+  namespace: test-agent
+  consulHost: http://host.docker.internal:8500
   consulToken:  
   executorInitialDelay: 5
-  executorExecutionInterval: 5  
-  labelsToFilter: capi
+  executorExecutionInterval: 5
   serviceAccountName: capi
+  discoverServices: false
+  defaultLogLevel: DEBUG
+  upgrade: up38
 
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 60
-

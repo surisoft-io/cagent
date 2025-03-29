@@ -3,13 +3,15 @@ package io.surisoft.cagent.schema;
 import java.util.List;
 
 public class AgentEnvironment {
+
     private String namespace;
     private String consulHost;
     private int consulPort;
     private String consulToken;
     private int executorInitialDelay;
     private int executorExecutionInterval;
-    private List<String> labelsToFilter;
+    private boolean listenForServices;
+    private String defaultLogLevel;
 
     public String getNamespace() {
         return namespace;
@@ -59,11 +61,19 @@ public class AgentEnvironment {
         this.executorExecutionInterval = executorExecutionInterval;
     }
 
-    public List<String> getLabelsToFilter() {
-        return labelsToFilter;
+    public boolean isListenForServices() {
+        return listenForServices;
     }
 
-    public void setLabelsToFilter(List<String> labelsToFilter) {
-        this.labelsToFilter = labelsToFilter;
+    public void setListenForServices(boolean listenForServices) {
+        this.listenForServices = listenForServices;
+    }
+
+    public String getDefaultLogLevel() {
+        return defaultLogLevel;
+    }
+
+    public void setDefaultLogLevel(String defaultLogLevel) {
+        this.defaultLogLevel = defaultLogLevel;
     }
 }

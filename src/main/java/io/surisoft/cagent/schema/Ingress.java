@@ -2,12 +2,14 @@ package io.surisoft.cagent.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Service {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Ingress {
     @JsonProperty("ID")
     private String id;
     @JsonProperty("Name")
@@ -23,8 +25,6 @@ public class Service {
     private Check check;
     @JsonIgnore
     private boolean registered;
-    @JsonProperty
-    private String consulType;
 
     public String getId() {
         return id;
@@ -89,10 +89,5 @@ public class Service {
     public void setRegistered(boolean registered) {
         this.registered = registered;
     }
-    public String getConsulType() {
-        return consulType;
-    }
-    public void setConsulType(String consulType) {
-        this.consulType = consulType;
-    }
+
 }
