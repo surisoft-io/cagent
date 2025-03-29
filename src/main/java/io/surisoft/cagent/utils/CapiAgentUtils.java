@@ -7,7 +7,6 @@ import io.surisoft.cagent.schema.Meta;
 import io.surisoft.cagent.schema.Service;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,7 +36,7 @@ public class CapiAgentUtils {
 
     public Service createService(V1Deployment kubernetesService) {
         Service service = new Service();
-        buildServiceMetadata(service, kubernetesService);
+        //buildMetadata(service, kubernetesService);
         service.setId(Objects.requireNonNull(kubernetesService.getMetadata()).getName() + "-" + service.getMeta().getGroup());
         service.setName(Objects.requireNonNull(kubernetesService.getMetadata()).getName());
         if(kubernetesService.getMetadata().getLabels().containsKey("consul-type")) {
@@ -50,7 +49,7 @@ public class CapiAgentUtils {
         Ingress ingress = new Ingress();
         ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
         ingress.setPort(getIngressPort(v1Ingress.getMetadata()));
-        ingress.setMeta(buildIngressMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
+        ingress.setMeta(buildMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
         ingress.setId(v1Ingress.getMetadata().getName() + "-" + ingress.getMeta().getGroup());
         ingress.setName(v1Ingress.getMetadata().getName());
         ingress.setRegistered(false);
@@ -64,29 +63,25 @@ public class CapiAgentUtils {
         return ingress;
     }
 
-    private void buildServiceMetadata(Service service, V1Deployment deployment) {
-        Meta meta = new Meta();
-        List<V1Container> containerList = Objects.requireNonNull(Objects.requireNonNull(deployment.getSpec()).getTemplate().getSpec()).getContainers();
-        Objects.requireNonNull(containerList.getFirst().getEnv()).forEach(env -> {
-            switch(env.getName()) {
-                case "spring.cloud.consul.discovery.metadata.group": meta.setGroup(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.ingress": meta.setIngress(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.secured": meta.setSecured(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.schema": meta.setSchema(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.keep-group": meta.setKeepGroup(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.open-api": meta.setOpenApiEndpoint(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.opa-rego": meta.setOpaRego(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.namespace": meta.setNamespace(env.getValue()); break;
-                case "spring.cloud.consul.discovery.metadata.subscription-group": meta.setSubscriptionGroup(env.getValue()); break;
-            }
-        });
-        service.setMeta(meta);
-    }
-
-    private Meta buildIngressMetadata(Map<String, String> annotations) {
+    private Meta buildMetadata(Map<String, String> annotations) {
         Meta meta = new Meta();
         meta.setGroup(annotations.get(CapiAnnotations.CAPI_META_GROUP));
         meta.setIngress(annotations.get(CapiAnnotations.CAPI_META_INGRESS));
+        if(annotations.containsKey(CapiAnnotations.CAPI_META_SECURED)) {
+            meta.setSecured(annotations.get(CapiAnnotations.CAPI_META_SECURED));
+        }
+        if(annotations.containsKey(CapiAnnotations.CAPI_META_SCHEME)) {
+            meta.setSchema(annotations.get(CapiAnnotations.CAPI_META_SCHEME));
+        }
+        if(annotations.containsKey(CapiAnnotations.CAPI_META_INSTANCE)) {
+            meta.setCapiInstance(annotations.get(CapiAnnotations.CAPI_META_INSTANCE));
+        }
+        if(annotations.containsKey(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP)) {
+            meta.setSubscriptionGroup(annotations.get(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP));
+        }
+        if(annotations.containsKey(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST)) {
+            meta.setRouteGroupFirst(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST);
+        }
         //and others
         return meta;
     }

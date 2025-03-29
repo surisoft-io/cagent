@@ -17,9 +17,12 @@ public class Meta {
     private String schema;
     @JsonProperty("open-api")
     private String openApiEndpoint;
-    private String namespace;
+    @JsonProperty("capi-instance")
+    private String capiInstance;
     @JsonProperty("subscription-group")
     private String subscriptionGroup;
+    @JsonProperty("route-group-first")
+    private String routeGroupFirst;
 
     public String getGroup() {
         return group;
@@ -77,12 +80,12 @@ public class Meta {
         this.openApiEndpoint = openApiEndpoint;
     }
 
-    public String getNamespace() {
-        return namespace;
+    public String getCapiInstance() {
+        return capiInstance;
     }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
+    public void setCapiInstance(String capiInstance) {
+        this.capiInstance = capiInstance;
     }
 
     public String getSubscriptionGroup() {
@@ -91,5 +94,13 @@ public class Meta {
 
     public void setSubscriptionGroup(String subscriptionGroup) {
         this.subscriptionGroup = subscriptionGroup;
+    }
+
+    public String getRouteGroupFirst() {
+        return routeGroupFirst;
+    }
+
+    public void setRouteGroupFirst(String routeGroupFirst) {
+        this.routeGroupFirst = routeGroupFirst;
     }
 }
