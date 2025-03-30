@@ -21,7 +21,7 @@ cagent:
   serviceAccountName: capi
   discoverServices: false
   defaultLogLevel: DEBUG
-  upgrade: up38
+  upgrade: up39.github
 
 autoscaling:
   enabled: false
