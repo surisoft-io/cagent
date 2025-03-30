@@ -13,6 +13,9 @@ jobs:
       with:
         java-version: 21
     - uses: actions/checkout@v3.5.3
+    - name: Set Release version env variable
+      run: |
+        echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
     - name: Docker login
       run: |
           docker login -u surisoft -p ${{ secrets.DOCKER_HUB_PWD }}
