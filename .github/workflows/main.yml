@@ -1,4 +1,4 @@
-name: capi
+name: cagent
 on:
   push:
     branches: [ master ]
@@ -21,8 +21,8 @@ jobs:
         docker buildx create --use
         docker buildx build . \
           --platform linux/amd64,linux/arm64 \
-          --build-arg "CAPI_VERSION=${{ env.RELEASE_VERSION }}" \
+          --build-arg "CAGENT_VERSION=${{ env.RELEASE_VERSION }}" \
           --file Dockerfile \
-          --tag surisoft/capi:${{ env.RELEASE_VERSION }} \
-          --tag surisoft/capi:latest \
+          --tag surisoft/cagent:${{ env.RELEASE_VERSION }} \
+          --tag surisoft/cagent:latest \
           --push
