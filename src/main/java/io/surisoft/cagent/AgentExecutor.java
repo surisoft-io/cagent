@@ -44,6 +44,7 @@ public class AgentExecutor {
     }
 
     public void start() {
+        logger.debug("Creating executors for ingresses with time interval of {} seconds", agentEnvironment.getExecutorExecutionInterval());
         ScheduledExecutorService ingressConsumer = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService ingressIntegrator = Executors.newSingleThreadScheduledExecutor();
         ingressConsumer.scheduleAtFixedRate(
