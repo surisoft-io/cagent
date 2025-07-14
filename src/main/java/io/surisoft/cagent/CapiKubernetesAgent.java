@@ -34,7 +34,8 @@ public class CapiKubernetesAgent {
             logger.info("CAPI Agent: Creating Kubernetes Client Api");
             ApiClient apiClient = Config.defaultClient();
 
-            logger.debug(apiClient.getJSON().toString());
+            logger.debug(apiClient.getBasePath());
+            logger.debug(apiClient.getAuthentications().toString());
 
             logger.info("CAPI Agent: Starting Agent Executor");
             AgentExecutor agentExecutor = new AgentExecutor(apiClient, agentEnvironment, consulService, capiAgentUtils);
