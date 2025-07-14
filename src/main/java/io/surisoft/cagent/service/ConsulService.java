@@ -2,6 +2,7 @@ package io.surisoft.cagent.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.surisoft.cagent.schema.Ingress;
+import io.surisoft.cagent.schema.Meta;
 import io.surisoft.cagent.schema.Service;
 import io.surisoft.cagent.utils.Constants;
 import okhttp3.*;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class ConsulService {
     private static final Logger logger = LoggerFactory.getLogger(ConsulService.class);
@@ -48,23 +50,27 @@ public class ConsulService {
 
     public void registerIngress(Ingress ingress) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
-            logger.debug(objectMapper.writeValueAsString(ingress));
-            Request.Builder requestBuilder = new Request.Builder()
-                    .url(host + Constants.CONSUL_REGISTER_PATH)
-                    .put(body);
-            requestBuilder.addHeader(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-            if(token != null && !token.isEmpty()) {
-                requestBuilder.addHeader(Constants.AUTHORIZATION_HEADER, Constants.BEARER_TOKEN + token);
-            }
-            Request request = requestBuilder.build();
-            Call call = okHttpClient.newCall(request);
-            try (Response response = call.execute()) {
-                logger.debug(response.code()+"");
-                if(response.code() == 200) {
-                    logger.debug("Ingress {} registered with success on Consul.", ingress.getId());
-                    ingress.setRegistered(true);
+            for(Meta meta : ingress.getMetaList()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                ingress.setId(ingress.getName() + "-" + ingress.getMetaList().getFirst().getGroup() + "-" + meta.getCapiInstance());
+                ingress.setMeta(meta);
+                RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
+                logger.debug(objectMapper.writeValueAsString(ingress));
+                Request.Builder requestBuilder = new Request.Builder()
+                        .url(host + Constants.CONSUL_REGISTER_PATH)
+                        .put(body);
+                requestBuilder.addHeader(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+                if(token != null && !token.isEmpty()) {
+                    requestBuilder.addHeader(Constants.AUTHORIZATION_HEADER, Constants.BEARER_TOKEN + token);
+                }
+                Request request = requestBuilder.build();
+                Call call = okHttpClient.newCall(request);
+                try (Response response = call.execute()) {
+                    logger.debug(response.code()+"");
+                    if(response.code() == 200) {
+                        logger.debug("Ingress {} registered with success on Consul.", ingress.getId());
+                        ingress.setRegistered(true);
+                    }
                 }
             }
         } catch (IOException e) {

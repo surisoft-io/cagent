@@ -20,11 +20,13 @@ public class Ingress {
     private String address;
     @JsonProperty("Port")
     private int port;
-    @JsonProperty("Meta")
-    private Meta meta;
+    @JsonIgnore
+    private List<Meta> metaList;
     private Check check;
     @JsonIgnore
     private boolean registered;
+    @JsonProperty
+    private Meta meta;
 
     public String getId() {
         return id;
@@ -66,12 +68,12 @@ public class Ingress {
         this.port = port;
     }
 
-    public Meta getMeta() {
-        return meta;
+    public List<Meta> getMetaList() {
+        return metaList;
     }
 
-    public void setMeta(Meta meta) {
-        this.meta = meta;
+    public void setMetaList(List<Meta> metaList) {
+        this.metaList = metaList;
     }
 
     public Check getCheck() {
@@ -88,6 +90,12 @@ public class Ingress {
 
     public void setRegistered(boolean registered) {
         this.registered = registered;
+    }
+    public Meta getMeta() {
+        return meta;
+    }
+    public void setMeta(Meta meta) {
+        this.meta = meta;
     }
 
 }

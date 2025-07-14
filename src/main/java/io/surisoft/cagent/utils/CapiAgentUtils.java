@@ -1,16 +1,20 @@
 package io.surisoft.cagent.utils;
 
 import io.kubernetes.client.openapi.models.*;
+import io.surisoft.cagent.AgentExecutor;
 import io.surisoft.cagent.schema.CapiAnnotations;
 import io.surisoft.cagent.schema.Ingress;
 import io.surisoft.cagent.schema.Meta;
 import io.surisoft.cagent.schema.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class CapiAgentUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(CapiAgentUtils.class);
 
     public String findServiceAddress(V1Service kubernetesService) {
         V1ServiceSpec serviceSpec = kubernetesService.getSpec();
@@ -49,8 +53,7 @@ public class CapiAgentUtils {
         Ingress ingress = new Ingress();
         ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
         ingress.setPort(getIngressPort(v1Ingress.getMetadata()));
-        ingress.setMeta(buildMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
-        ingress.setId(v1Ingress.getMetadata().getName() + "-" + ingress.getMeta().getGroup());
+        ingress.setMetaList(buildMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
         ingress.setName(v1Ingress.getMetadata().getName());
         ingress.setRegistered(false);
 
@@ -63,27 +66,34 @@ public class CapiAgentUtils {
         return ingress;
     }
 
-    private Meta buildMetadata(Map<String, String> annotations) {
-        Meta meta = new Meta();
-        meta.setGroup(annotations.get(CapiAnnotations.CAPI_META_GROUP));
-        meta.setIngress(annotations.get(CapiAnnotations.CAPI_META_INGRESS));
-        if(annotations.containsKey(CapiAnnotations.CAPI_META_SECURED)) {
-            meta.setSecured(annotations.get(CapiAnnotations.CAPI_META_SECURED));
-        }
-        if(annotations.containsKey(CapiAnnotations.CAPI_META_SCHEME)) {
-            meta.setSchema(annotations.get(CapiAnnotations.CAPI_META_SCHEME));
-        }
-        if(annotations.containsKey(CapiAnnotations.CAPI_META_INSTANCE)) {
-            meta.setCapiInstance(annotations.get(CapiAnnotations.CAPI_META_INSTANCE));
-        }
-        if(annotations.containsKey(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP)) {
-            meta.setSubscriptionGroup(annotations.get(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP));
-        }
-        if(annotations.containsKey(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST)) {
-            meta.setRouteGroupFirst(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST);
-        }
-        //and others
-        return meta;
+    private List<Meta> buildMetadata(Map<String, String> annotations) {
+        List<Meta> metaList = new ArrayList<>();
+
+        String group = annotations.get(CapiAnnotations.CAPI_META_GROUP);
+        String ingressName = annotations.get(CapiAnnotations.CAPI_META_INGRESS);
+
+        Map<String, Map<String, String>> parsedMeta = parseInstanceAnnotation(annotations);
+        parsedMeta.forEach((k, v) -> {
+            Meta meta = new Meta();
+            meta.setCapiInstance(k);
+            meta.setIngress(ingressName);
+            meta.setGroup(group);
+
+            if(v.containsKey(CapiAnnotations.CAPI_META_SECURED)) {
+                meta.setSecured(v.get(CapiAnnotations.CAPI_META_SECURED));
+            }
+            if(v.containsKey(CapiAnnotations.CAPI_META_SCHEME)) {
+                meta.setSchema(v.get(CapiAnnotations.CAPI_META_SCHEME));
+            }
+            if(v.containsKey(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP)) {
+                meta.setSubscriptionGroup(v.get(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP));
+            }
+            if(v.containsKey(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST)) {
+                meta.setRouteGroupFirst(v.get(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST));
+            }
+            metaList.add(meta);
+        });
+        return metaList;
     }
 
 
@@ -116,5 +126,21 @@ public class CapiAgentUtils {
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid URL format: " + ingress, e);
         }
+    }
+
+    public Map<String, Map<String, String>> parseInstanceAnnotation(Map<String, String> annotations) {
+        Map<String, Map<String, String>> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : annotations.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith(Constants.CAPI_INSTANCE_ANNOTATION_PREFIX)) {
+                String[] parts = key.substring(Constants.CAPI_INSTANCE_ANNOTATION_PREFIX.length() + 1).split("\\.", 2);
+                if (parts.length == 2) {
+                    String instance = parts[0];
+                    String property = parts[1];
+                    result.computeIfAbsent(instance, k -> new HashMap<>()).put(property, entry.getValue());
+                }
+            }
+        }
+        return result;
     }
 }

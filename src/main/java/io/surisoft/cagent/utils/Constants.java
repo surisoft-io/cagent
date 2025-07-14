@@ -23,4 +23,5 @@ public class Constants {
     public static final String HTTP = "http";
     public static final String HTTPS_SCHEME = "https://";
     public static final String HTTP_SCHEME = "http://";
+    public static final String CAPI_INSTANCE_ANNOTATION_PREFIX = "capi.meta.instance";
 }
