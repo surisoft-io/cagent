@@ -78,8 +78,6 @@ public class AgentExecutor {
                     new TypeToken<Watch.Response<V1Ingress>>() {
                     }.getType())) {
                 for (Watch.Response<V1Ingress> item : watch) {
-                    logger.debug(item.type);
-                    logger.debug(item.object.toJson());
                     if (item.type.equals(Constants.KUBERNETES_ADDED_EVENT) && !localServices.containsKey(Objects.requireNonNull(item.object.getMetadata()).getName())) {
                         if (registerIngress(item.object.getMetadata())) {
                             logger.info("New Ingress {} detected, adding to the list", item.object.getMetadata().getName());
@@ -93,6 +91,13 @@ public class AgentExecutor {
                             consulService.deregisterIngress(ingress);
                             localIngresses.remove(item.object.getMetadata().getName());
                         }
+                    } else {
+                        V1Ingress ingress = item.object;
+                        String name = "undetermined";
+                        if(ingress.getMetadata() != null && ingress.getMetadata().getName() != null) {
+                            name = ingress.getMetadata().getName();
+                        }
+                        logger.debug("Ignoring ingress {} with event type {}", name, item.type);
                     }
                 }
             }
@@ -193,8 +198,4 @@ public class AgentExecutor {
         }
         return null;
     }
-
-
-
-
 }
