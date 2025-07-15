@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 public class ConsulService {
@@ -107,13 +108,11 @@ public class ConsulService {
         }
     }
 
-    public void deregisterIngress(Ingress ingress) {
+    public void deregisterIngress(List<Ingress> ingressList) {
         try {
-            for(Meta meta : ingress.getMetaList()) {
-                logger.debug("Processing ingress metadata for {}", meta.getConsulId());
+            for(Ingress ingress : ingressList) {
+                logger.debug("Processing ingress metadata for {}", ingress.getId());
                 ObjectMapper objectMapper = new ObjectMapper();
-                ingress.setId(meta.getConsulId());
-                ingress.setMeta(meta);
                 RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
                 Request.Builder requestBuilder = new Request.Builder()
                         .url(host + Constants.CONSUL_DEREGISTER_PATH + ingress.getId())

@@ -47,15 +47,15 @@ public class AgentExecutor {
     public void start() {
         logger.debug("Creating executors for ingresses with time interval of {} seconds", agentEnvironment.getExecutorExecutionInterval());
         ScheduledExecutorService ingressConsumer = Executors.newSingleThreadScheduledExecutor();
-        ScheduledExecutorService ingressIntegrator = Executors.newSingleThreadScheduledExecutor();
+        /*ScheduledExecutorService ingressIntegrator = Executors.newSingleThreadScheduledExecutor();*/
         ingressConsumer.scheduleAtFixedRate(
                 checkForIngresses, agentEnvironment.getExecutorInitialDelay(),
                 agentEnvironment.getExecutorExecutionInterval(),
                 TimeUnit.SECONDS);
-        ingressIntegrator.scheduleAtFixedRate(
+        /*ingressIntegrator.scheduleAtFixedRate(
                 registerIngresses, agentEnvironment.getExecutorInitialDelay(),
                 agentEnvironment.getExecutorExecutionInterval(),
-                TimeUnit.SECONDS);
+                TimeUnit.SECONDS);*/
     }
 
     private final Runnable checkForIngresses = () -> {
@@ -75,16 +75,15 @@ public class AgentExecutor {
                         if (registerIngress(item.object.getMetadata())) {
                             logger.info("New Ingress {} detected, adding to the list", item.object.getMetadata().getName());
                             List<Ingress> ingressList = capiAgentUtils.createIngress(item.object);
-                            for(Ingress ingress : ingressList) {
-                                localIngresses.put(ingress.getName(), ingress);
-                            }
+                            ingressList.forEach((ingress) -> {
+                                consulService.registerIngress(ingress);
+                            });
                         }
                     } else if (item.type.equals(Constants.KUBERNETES_DELETED_EVENT)) {
                         if (registerIngress(Objects.requireNonNull(item.object.getMetadata()))) {
                             logger.info("Deleted ingress {} detected, removing from list", Objects.requireNonNull(item.object.getMetadata()).getName());
-                            Ingress ingress = localIngresses.get(item.object.getMetadata().getName());
-                            consulService.deregisterIngress(ingress);
-                            localIngresses.remove(item.object.getMetadata().getName());
+                            List<Ingress> ingressList = capiAgentUtils.createIngress(item.object);
+                            consulService.deregisterIngress(ingressList);
                         }
                     } else {
                         V1Ingress ingress = item.object;
@@ -102,13 +101,13 @@ public class AgentExecutor {
         }
     };
 
-    private final Runnable registerIngresses = () -> {
+    /*private final Runnable registerIngresses = () -> {
         localIngresses.forEach((k, v) -> {
             if (!v.isRegistered()) {
                 consulService.registerIngress(v);
             }
         });
-    };
+    };*/
 
     private boolean registerIngress(V1ObjectMeta objectMeta) {
         return objectMeta.getAnnotations() != null && objectMeta.getAnnotations().containsKey(CapiAnnotations.CAPI_META_AWARE);
