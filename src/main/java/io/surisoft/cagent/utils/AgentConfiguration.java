@@ -11,7 +11,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
-import java.util.List;
 
 public class AgentConfiguration {
     public AgentEnvironment buildAgentEnvironment() {
@@ -45,10 +44,6 @@ public class AgentConfiguration {
         root.setLevel(Level.valueOf(agentEnvironment.getDefaultLogLevel()));
         return agentEnvironment;
     }
-
-    //private OkHttpClient createHttpClient() {
-    //    return new OkHttpClient.Builder().build();
-    //}
 
     private OkHttpClient createHttpClient() {
         try {
