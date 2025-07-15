@@ -79,15 +79,15 @@ public class CapiAgentUtils {
     private List<Meta> buildMetadata(Map<String, String> annotations) {
         List<Meta> metaList = new ArrayList<>();
 
-        String group = annotations.get(CapiAnnotations.CAPI_META_GROUP);
-        String ingressName = annotations.get(CapiAnnotations.CAPI_META_INGRESS);
-
         Map<String, Map<String, String>> parsedMeta = parseInstanceAnnotation(annotations);
         parsedMeta.forEach((k, v) -> {
             Meta meta = new Meta();
             meta.setCapiInstance(k);
-            meta.setIngress(ingressName);
-            meta.setGroup(group);
+            //meta.setIngress(ingressName);
+            //meta.setGroup(group);
+
+            logger.debug(k);
+            logger.debug(v.toString());
 
             if(v.containsKey(CapiAnnotations.CAPI_META_SECURED)) {
                 meta.setSecured(v.get(CapiAnnotations.CAPI_META_SECURED));
