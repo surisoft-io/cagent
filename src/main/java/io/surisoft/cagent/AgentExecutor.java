@@ -111,7 +111,6 @@ public class AgentExecutor {
         logger.debug("Going to register ingresses....");
         localIngresses.forEach((k, v) -> {
             if (!v.isRegistered()) {
-                logger.debug(v.getName());
                 consulService.registerIngress(v);
             }
         });

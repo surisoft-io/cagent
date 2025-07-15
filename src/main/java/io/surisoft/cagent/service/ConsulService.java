@@ -49,8 +49,10 @@ public class ConsulService {
     }
 
     public void registerIngress(Ingress ingress) {
+        logger.debug("Registering ingress {} with Consul", ingress.getId());
         try {
             for(Meta meta : ingress.getMetaList()) {
+                logger.debug("Processing ingress metadata");
                 ObjectMapper objectMapper = new ObjectMapper();
                 ingress.setId(ingress.getName() + "-" + ingress.getMetaList().getFirst().getGroup() + "-" + meta.getCapiInstance());
                 ingress.setMeta(meta);
