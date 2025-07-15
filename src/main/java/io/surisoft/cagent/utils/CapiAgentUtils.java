@@ -50,7 +50,7 @@ public class CapiAgentUtils {
 
     public List<Ingress> createIngress(V1Ingress v1Ingress) {
         List<Ingress> ingressList = new ArrayList<>();
-        if(v1Ingress.getMetadata() == null && v1Ingress.getMetadata().getAnnotations() == null) {
+        if(v1Ingress.getMetadata() != null && v1Ingress.getMetadata().getAnnotations() != null) {
             buildMetadata(v1Ingress.getMetadata().getAnnotations()).forEach(meta -> {
                 Ingress ingress = new Ingress();
                 ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
