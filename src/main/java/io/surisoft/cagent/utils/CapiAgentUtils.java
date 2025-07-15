@@ -54,7 +54,7 @@ public class CapiAgentUtils {
             buildMetadata(v1Ingress.getMetadata().getAnnotations()).forEach(meta -> {
                 Ingress ingress = new Ingress();
                 ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
-                ingress.setPort(getIngressPort(v1Ingress.getMetadata()));
+                ingress.setPort(getIngressPort(meta));
                 ingress.setName(v1Ingress.getMetadata().getName() + "-" + meta.getGroup() + "-" + meta.getCapiInstance());
                 ingress.setId(v1Ingress.getMetadata().getName() + "-" + meta.getGroup() + "-" + meta.getCapiInstance());
                 ingress.setMeta(meta);
@@ -119,20 +119,21 @@ public class CapiAgentUtils {
     }
 
 
-    public static int getIngressPort(V1ObjectMeta ingressMetadata) {
-        String ingress = Objects.requireNonNull(ingressMetadata.getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS);
-        String metaDataScheme = Objects.requireNonNull(ingressMetadata.getAnnotations()).get(CapiAnnotations.CAPI_META_SCHEME);
+    public static int getIngressPort(Meta meta) {
+        String ingress;
         try {
             // Ensure the input has a scheme
-            if (!ingress.startsWith(Constants.HTTP_SCHEME) && !ingress.startsWith(Constants.HTTPS_SCHEME)) {
-                if(metaDataScheme != null && metaDataScheme.equals(Constants.HTTP)) {
-                    ingress = Constants.HTTP_SCHEME + ingress;
-                } else if(metaDataScheme != null && metaDataScheme.equals(Constants.HTTPS)) {
-                    ingress = Constants.HTTPS_SCHEME + ingress;
+            if (!meta.getIngress().startsWith(Constants.HTTP_SCHEME) && !meta.getIngress().startsWith(Constants.HTTPS_SCHEME)) {
+                if(meta.getSchema() != null && meta.getSchema().equals(Constants.HTTP)) {
+                    ingress = Constants.HTTP_SCHEME + meta.getIngress();
+                } else if(meta.getSchema() != null && meta.getSchema().equals(Constants.HTTPS)) {
+                    ingress = Constants.HTTPS_SCHEME + meta.getIngress();
                 } else {
                     // Default to http for parsing
-                    ingress = Constants.HTTP_SCHEME + ingress;
+                    ingress = Constants.HTTP_SCHEME + meta.getIngress();
                 }
+            } else {
+                ingress = meta.getIngress();
             }
 
             URI uri = new URI(ingress);
@@ -146,7 +147,7 @@ public class CapiAgentUtils {
 
             return port;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid URL format: " + ingress, e);
+            throw new IllegalArgumentException("Invalid URL format: " + meta.getIngress(), e);
         }
     }
 
