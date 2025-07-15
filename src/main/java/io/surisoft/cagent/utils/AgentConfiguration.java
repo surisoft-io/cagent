@@ -5,6 +5,12 @@ import ch.qos.logback.classic.Logger;
 import io.surisoft.cagent.schema.AgentEnvironment;
 import io.surisoft.cagent.service.ConsulService;
 import okhttp3.OkHttpClient;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 public class AgentConfiguration {
@@ -42,8 +48,37 @@ public class AgentConfiguration {
         return agentEnvironment;
     }
 
+    //private OkHttpClient createHttpClient() {
+    //    return new OkHttpClient.Builder().build();
+    //}
+
     private OkHttpClient createHttpClient() {
-        return new OkHttpClient.Builder().build();
+        try {
+            final TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[]{};
+                        }
+                    }
+            };
+
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
+            builder.hostnameVerifier((hostname, session) -> false);
+
+            return builder.build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ConsulService createConsulService(AgentEnvironment agentEnvironment) {
