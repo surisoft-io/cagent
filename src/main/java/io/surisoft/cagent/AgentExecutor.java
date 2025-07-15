@@ -108,6 +108,7 @@ public class AgentExecutor {
     };
 
     private final Runnable registerIngresses = () -> {
+        logger.debug("Going to register ingresses....");
         localIngresses.forEach((k, v) -> {
             if (!v.isRegistered()) {
                 logger.debug(v.getName());

@@ -1,7 +1,6 @@
 package io.surisoft.cagent.utils;
 
 import io.kubernetes.client.openapi.models.*;
-import io.surisoft.cagent.AgentExecutor;
 import io.surisoft.cagent.schema.CapiAnnotations;
 import io.surisoft.cagent.schema.Ingress;
 import io.surisoft.cagent.schema.Meta;
@@ -50,19 +49,14 @@ public class CapiAgentUtils {
     }
 
     public Ingress createIngress(V1Ingress v1Ingress) {
+        logger.debug("Ingress name {}", v1Ingress.getMetadata().getName());
+        logger.debug("Ingress port {}", getIngressPort(v1Ingress.getMetadata()));
         Ingress ingress = new Ingress();
         ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
         ingress.setPort(getIngressPort(v1Ingress.getMetadata()));
         ingress.setMetaList(buildMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
         ingress.setName(v1Ingress.getMetadata().getName());
         ingress.setRegistered(false);
-
-        //buildServiceMetadata(service, ingress);
-        //service.setId(Objects.requireNonNull(kubernetesService.getMetadata()).getName() + "-" + service.getMeta().getGroup());
-        //service.setName(Objects.requireNonNull(kubernetesService.getMetadata()).getName());
-        //if(kubernetesService.getMetadata().getLabels().containsKey("consul-type")) {
-        //    service.setConsulType(kubernetesService.getMetadata().getLabels().get("consul-type"));
-        //}
         return ingress;
     }
 
