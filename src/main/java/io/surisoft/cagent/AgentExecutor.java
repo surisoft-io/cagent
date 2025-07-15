@@ -112,6 +112,6 @@ public class AgentExecutor {
     };
 
     private boolean registerIngress(V1ObjectMeta objectMeta) {
-        return objectMeta.getAnnotations() == null && objectMeta.getAnnotations().containsKey(CapiAnnotations.CAPI_META_AWARE);
+        return objectMeta.getAnnotations() != null && objectMeta.getAnnotations().containsKey(CapiAnnotations.CAPI_META_AWARE);
     }
 }
