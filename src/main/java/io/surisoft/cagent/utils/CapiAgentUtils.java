@@ -48,8 +48,24 @@ public class CapiAgentUtils {
         return service;
     }
 
-    public Ingress createIngress(V1Ingress v1Ingress) {
-        logger.debug("Ingress name {}", v1Ingress.getMetadata().getName());
+    public List<Ingress> createIngress(V1Ingress v1Ingress) {
+        List<Ingress> ingressList = new ArrayList<>();
+        if(v1Ingress.getMetadata() == null && v1Ingress.getMetadata().getAnnotations() == null) {
+            buildMetadata(v1Ingress.getMetadata().getAnnotations()).forEach(meta -> {
+                Ingress ingress = new Ingress();
+                ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
+                ingress.setPort(getIngressPort(v1Ingress.getMetadata()));
+                ingress.setName(v1Ingress.getMetadata().getName() + "-" + meta.getGroup() + "-" + meta.getCapiInstance());
+                ingress.setId(v1Ingress.getMetadata().getName() + "-" + meta.getGroup() + "-" + meta.getCapiInstance());
+                ingress.setMeta(meta);
+                ingress.setRegistered(false);
+                ingressList.add(ingress);
+            });
+
+        }
+        return ingressList;
+
+        /*logger.debug("Ingress name {}", v1Ingress.getMetadata().getName());
         logger.debug("Ingress port {}", getIngressPort(v1Ingress.getMetadata()));
         Ingress ingress = new Ingress();
         ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
@@ -57,7 +73,7 @@ public class CapiAgentUtils {
         ingress.setMetaList(buildMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
         ingress.setName(v1Ingress.getMetadata().getName());
         ingress.setRegistered(false);
-        return ingress;
+        return ingress;*/
     }
 
     private List<Meta> buildMetadata(Map<String, String> annotations) {

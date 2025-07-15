@@ -1,6 +1,7 @@
 package io.surisoft.cagent.schema;
 
 public class CapiAnnotations {
+    public static final String CAPI_META_AWARE = "capi.meta.aware";
     public static final String CAPI_META_GROUP = "capi.meta.group";
     public static final String CAPI_META_INGRESS = "capi.meta.ingress";
     public static final String CAPI_META_INSTANCE = "capi.meta.instance";

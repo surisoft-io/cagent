@@ -36,8 +36,6 @@ public class AgentConfiguration {
                 System.getenv(Constants.NAMESPACE) == null ?
                         null :
                         System.getenv(Constants.NAMESPACE));
-        agentEnvironment.setListenForServices(
-                System.getenv(Constants.DISCOVER_SERVICES) != null && Boolean.parseBoolean(System.getenv(Constants.DISCOVER_SERVICES)));
         agentEnvironment.setDefaultLogLevel(
                 System.getenv(Constants.LOG_LEVEL) == null ?
                         "INFO":

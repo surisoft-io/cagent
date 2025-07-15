@@ -51,12 +51,12 @@ public class ConsulService {
     public void registerIngress(Ingress ingress) {
         logger.debug("Registering ingress {} with Consul", ingress.getId());
         try {
-            for(Meta meta : ingress.getMetaList()) {
-                meta.setConsulId(ingress.getName() + "-" + ingress.getMetaList().getFirst().getGroup() + "-" + meta.getCapiInstance());
-                logger.debug("Processing ingress metadata for {}", meta.getConsulId());
+            //for(Meta meta : ingress.getMetaList()) {
+                //meta.setConsulId(ingress.getName() + "-" + ingress.getMetaList().getFirst().getGroup() + "-" + meta.getCapiInstance());
+                logger.debug("Processing ingress metadata for {}", ingress.getId());
                 ObjectMapper objectMapper = new ObjectMapper();
-                ingress.setId(meta.getConsulId());
-                ingress.setMeta(meta);
+                //ingress.setId(meta.getConsulId());
+                //ingress.setMeta(meta);
                 RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
                 logger.debug(objectMapper.writeValueAsString(ingress));
                 Request.Builder requestBuilder = new Request.Builder()
@@ -77,7 +77,7 @@ public class ConsulService {
                         logger.error("Error registering ingress {} on Consul. Response code: {}", ingress.getId(), response.code());
                     }
                 }
-            }
+            //}
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }

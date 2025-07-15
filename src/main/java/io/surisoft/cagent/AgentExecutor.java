@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -55,14 +56,6 @@ public class AgentExecutor {
                 registerIngresses, agentEnvironment.getExecutorInitialDelay(),
                 agentEnvironment.getExecutorExecutionInterval(),
                 TimeUnit.SECONDS);
-
-        if(agentEnvironment.isListenForServices()) {
-            ScheduledExecutorService serviceExecutor = Executors.newSingleThreadScheduledExecutor();
-            serviceExecutor.scheduleAtFixedRate(
-                    checkForServices, agentEnvironment.getExecutorInitialDelay(),
-                    agentEnvironment.getExecutorExecutionInterval(),
-                    TimeUnit.SECONDS);
-        }
     }
 
     private final Runnable checkForIngresses = () -> {
@@ -81,8 +74,10 @@ public class AgentExecutor {
                     if (item.type.equals(Constants.KUBERNETES_ADDED_EVENT) && !localServices.containsKey(Objects.requireNonNull(item.object.getMetadata()).getName())) {
                         if (registerIngress(item.object.getMetadata())) {
                             logger.info("New Ingress {} detected, adding to the list", item.object.getMetadata().getName());
-                            Ingress ingress = capiAgentUtils.createIngress(item.object);
-                            localIngresses.put(ingress.getName(), ingress);
+                            List<Ingress> ingressList = capiAgentUtils.createIngress(item.object);
+                            for(Ingress ingress : ingressList) {
+                                localIngresses.put(ingress.getName(), ingress);
+                            }
                         }
                     } else if (item.type.equals(Constants.KUBERNETES_DELETED_EVENT)) {
                         if (registerIngress(Objects.requireNonNull(item.object.getMetadata()))) {
@@ -116,86 +111,7 @@ public class AgentExecutor {
         });
     };
 
-   private final Runnable checkForServices = () -> {
-
-        try {
-            proccessLocalServices();
-          /*
-            logger.debug("Checking for services....");
-            CoreV1Api coreV1Api = new CoreV1Api(apiClient);
-
-            Watch<V1Service> watch =
-                    Watch.createWatch(
-                            apiClient,
-                            coreV1Api.listNamespacedService("test-agent")
-                                    .watch(true)
-                                    .buildCall(null),
-                            new TypeToken<Watch.Response<V1Service>>() {}.getType());
-
-            try {
-                for (Watch.Response<V1Service> event : watch) {
-                    if(event.type.equals(Constants.KUBERNETES_ADDED_EVENT) &&
-                            localServices.containsKey(Objects.requireNonNull(event.object.getMetadata()).getName()) &&
-                            !localServices.get(event.object.getMetadata().getName()).isRegistered()) {
-                        localServices.get(event.object.getMetadata().getName()).setAddress(serviceUtils.findServiceAddress(event.object));
-                        localServices.get(event.object.getMetadata().getName()).setPort(serviceUtils.findServicePort(event.object));
-                        consulService.registerService(localServices.get(event.object.getMetadata().getName()));
-                    }
-                }
-            } finally {
-                watch.close();
-            }*/
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-    };
-
-    /*private boolean registerService(V1ObjectMeta objectMeta, AgentEnvironment agentEnvironment) {
-        for(String label : agentEnvironment.getLabelsToFilter()) {
-            if(Objects.requireNonNull(objectMeta.getLabels()).containsKey(label)) {
-                return true;
-            }
-        }
-        return false;
-    }*/
-
     private boolean registerIngress(V1ObjectMeta objectMeta) {
-        return Objects.requireNonNull(objectMeta.getAnnotations()).containsKey(CapiAnnotations.CAPI_META_GROUP) ||
-                objectMeta.getAnnotations().containsKey(CapiAnnotations.CAPI_META_INGRESS);
-    }
-
-    private void proccessLocalServices() {
-        localServices.forEach((k, v) -> {
-            if (!v.isRegistered()) {
-                logger.debug(v.getName());
-                if(v.getConsulType().equals("service")) {
-                    try {
-                        V1Service kubernetesService = getKubernetesService(v.getName());
-                        if(kubernetesService != null) {
-                            v.setAddress(capiAgentUtils.findServiceAddress(kubernetesService));
-                            v.setPort(capiAgentUtils.findServicePort(kubernetesService));
-                            consulService.registerService(v);
-                        }
-                    } catch(ApiException e) {
-                        logger.error(e.getMessage(), e);
-                    }
-                } else {
-                    logger.debug("INGRESS!!!!!!");
-
-                }
-
-            }
-        });
-    }
-
-    private V1Service getKubernetesService(String serviceName) throws ApiException {
-        CoreV1Api coreV1Api = new CoreV1Api(apiClient);
-        V1ServiceList serviceList = coreV1Api.listNamespacedService("test-agent").execute();
-        for(V1Service service : serviceList.getItems()) {
-            if(service.getMetadata().getName().equals(serviceName)) {
-                return service;
-            }
-        }
-        return null;
+        return objectMeta.getAnnotations() == null && objectMeta.getAnnotations().containsKey(CapiAnnotations.CAPI_META_AWARE);
     }
 }
