@@ -1,10 +1,7 @@
 package io.surisoft.cagent.utils;
 
 import io.kubernetes.client.openapi.models.*;
-import io.surisoft.cagent.schema.CapiAnnotations;
-import io.surisoft.cagent.schema.Ingress;
-import io.surisoft.cagent.schema.Meta;
-import io.surisoft.cagent.schema.Service;
+import io.surisoft.cagent.schema.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,14 +48,22 @@ public class CapiAgentUtils {
     public List<Ingress> createIngress(V1Ingress v1Ingress) {
         List<Ingress> ingressList = new ArrayList<>();
         if(v1Ingress.getMetadata() != null && v1Ingress.getMetadata().getAnnotations() != null) {
-            buildMetadata(v1Ingress.getMetadata().getAnnotations()).forEach(meta -> {
+            buildMetadata(v1Ingress.getMetadata().getAnnotations(), v1Ingress.getMetadata().getName()).forEach(meta -> {
                 Ingress ingress = new Ingress();
                 ingress.setAddress(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations()).get(CapiAnnotations.CAPI_META_INGRESS));
-                ingress.setPort(getIngressPort(meta));
                 ingress.setName(v1Ingress.getMetadata().getName() + "-" + meta.getGroup() + "-" + meta.getCapiInstance());
                 ingress.setId(v1Ingress.getMetadata().getName() + "-" + meta.getGroup() + "-" + meta.getCapiInstance());
                 ingress.setMeta(meta);
                 ingress.setRegistered(false);
+
+                if(meta.getHealthCheckPath() != null) {
+                    Check check = new Check();
+                    check.setCheckId("Check-" + ingress.getName());
+                    check.setHttp(meta.getHealthCheckPath());
+                    check.setInterval(meta.getHealthCheckInterval());
+                    check.setTimeout(meta.getGetHealthCheckTimeout());
+                    ingress.setCheck(check);
+                }
                 ingressList.add(ingress);
             });
 
@@ -76,44 +81,48 @@ public class CapiAgentUtils {
         return ingress;*/
     }
 
-    private List<Meta> buildMetadata(Map<String, String> annotations) {
+    private List<Meta> buildMetadata(Map<String, String> annotations, String ingressName) {
         List<Meta> metaList = new ArrayList<>();
 
         Map<String, Map<String, String>> parsedMeta = parseInstanceAnnotation(annotations);
         parsedMeta.forEach((k, v) -> {
             Meta meta = new Meta();
             meta.setCapiInstance(k);
-            //meta.setIngress(ingressName);
-            //meta.setGroup(group);
 
-            logger.debug(k);
-            logger.debug(v.toString());
+            if(v.containsKey(CapiAnnotations.CAPI_META_INGRESS) && v.containsKey(CapiAnnotations.CAPI_META_GROUP)) {
 
-            if(v.containsKey("ingress")) {
-                meta.setIngress(v.get("ingress"));
+                meta.setIngress(v.get(CapiAnnotations.CAPI_META_INGRESS));
+                meta.setGroup(v.get(CapiAnnotations.CAPI_META_GROUP));
+
+                if(v.containsKey("secured")) {
+                    meta.setSecured(v.get("secured"));
+                }
+
+                if(v.containsKey("scheme")) {
+                    meta.setSchema(v.get("scheme"));
+                }
+
+                if(v.containsKey("subscription-group")) {
+                    meta.setSubscriptionGroup(v.get("subscription-group"));
+                }
+
+                if(v.containsKey("route-group-first")) {
+                    meta.setRouteGroupFirst(v.get("route-group-first"));
+                }
+
+                if(v.containsKey(CapiAnnotations.CAPI_META_HEALTH_CHECK_PATH)) {
+                    meta.setHealthCheckPath(buildHealthCheck(meta.getIngress(), v.get(CapiAnnotations.CAPI_META_HEALTH_CHECK_PATH), meta.getSchema()));
+                    if(v.containsKey(CapiAnnotations.CAPI_META_HEALTH_CHECK_INTERVAL)) {
+                        meta.setHealthCheckInterval(v.get(CapiAnnotations.CAPI_META_HEALTH_CHECK_INTERVAL));
+                    }
+                    if(v.containsKey(CapiAnnotations.CAPI_META_HEALTH_CHECK_TIMEOUT)) {
+                        meta.setGetHealthCheckTimeout(v.get(CapiAnnotations.CAPI_META_HEALTH_CHECK_TIMEOUT));
+                    }
+                }
+                metaList.add(meta);
             }
 
-            if(v.containsKey("group")) {
-                meta.setGroup(v.get("group"));
-            }
 
-            if(v.containsKey("secured")) {
-                meta.setSecured(v.get("secured"));
-            }
-
-            if(v.containsKey("scheme")) {
-                meta.setSchema(v.get("scheme"));
-            }
-
-            if(v.containsKey("subscription-group")) {
-                meta.setSubscriptionGroup(v.get("subscription-group"));
-            }
-
-            if(v.containsKey("route-group-first")) {
-                meta.setRouteGroupFirst(v.get("route-group-first"));
-            }
-
-            metaList.add(meta);
         });
         return metaList;
     }
@@ -149,6 +158,27 @@ public class CapiAgentUtils {
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid URL format: " + meta.getIngress(), e);
         }
+    }
+
+    public String buildHealthCheck(String ingress, String healthCheckPath, String scheme) {
+        String healthCheck;
+
+        // Ensure the input has a scheme
+        if (!ingress.startsWith(Constants.HTTP_SCHEME) && !ingress.startsWith(Constants.HTTPS_SCHEME)) {
+            if(scheme != null && scheme.equals(Constants.HTTP)) {
+                healthCheck = Constants.HTTP_SCHEME + ingress + healthCheckPath;
+            } else if(scheme != null && scheme.equals(Constants.HTTPS)) {
+                healthCheck = Constants.HTTPS_SCHEME  + ingress + healthCheckPath;
+            } else {
+                // Default to http for parsing
+                healthCheck = Constants.HTTP_SCHEME + ingress + healthCheckPath;
+            }
+        } else {
+            healthCheck = ingress + healthCheckPath;
+        }
+
+        return healthCheck;
+
     }
 
     public Map<String, Map<String, String>> parseInstanceAnnotation(Map<String, String> annotations) {

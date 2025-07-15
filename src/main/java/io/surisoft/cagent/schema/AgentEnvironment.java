@@ -1,16 +1,12 @@
 package io.surisoft.cagent.schema;
 
-import java.util.List;
-
 public class AgentEnvironment {
 
     private String namespace;
     private String consulHost;
-    private int consulPort;
     private String consulToken;
     private int executorInitialDelay;
     private int executorExecutionInterval;
-    private boolean listenForServices;
     private String defaultLogLevel;
 
     public String getNamespace() {
@@ -27,14 +23,6 @@ public class AgentEnvironment {
 
     public void setConsulHost(String consulHost) {
         this.consulHost = consulHost;
-    }
-
-    public int getConsulPort() {
-        return consulPort;
-    }
-
-    public void setConsulPort(int consulPort) {
-        this.consulPort = consulPort;
     }
 
     public String getConsulToken() {
@@ -59,14 +47,6 @@ public class AgentEnvironment {
 
     public void setExecutorExecutionInterval(int executorExecutionInterval) {
         this.executorExecutionInterval = executorExecutionInterval;
-    }
-
-    public boolean isListenForServices() {
-        return listenForServices;
-    }
-
-    public void setListenForServices(boolean listenForServices) {
-        this.listenForServices = listenForServices;
     }
 
     public String getDefaultLogLevel() {

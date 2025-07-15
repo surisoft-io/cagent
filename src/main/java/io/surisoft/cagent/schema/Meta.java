@@ -27,6 +27,13 @@ public class Meta {
     @JsonIgnore
     private String consulId;
 
+    @JsonIgnore
+    private String healthCheckPath;
+    @JsonIgnore
+    private String healthCheckInterval;
+    @JsonIgnore
+    private String getHealthCheckTimeout;
+
     public String getGroup() {
         return group;
     }
@@ -113,5 +120,29 @@ public class Meta {
 
     public void setConsulId(String consulId) {
         this.consulId = consulId;
+    }
+
+    public String getHealthCheckPath() {
+        return healthCheckPath;
+    }
+
+    public void setHealthCheckPath(String healthCheckPath) {
+        this.healthCheckPath = healthCheckPath;
+    }
+
+    public String getHealthCheckInterval() {
+        return healthCheckInterval;
+    }
+
+    public void setHealthCheckInterval(String healthCheckInterval) {
+        this.healthCheckInterval = healthCheckInterval;
+    }
+
+    public String getGetHealthCheckTimeout() {
+        return getHealthCheckTimeout;
+    }
+
+    public void setGetHealthCheckTimeout(String getHealthCheckTimeout) {
+        this.getHealthCheckTimeout = getHealthCheckTimeout;
     }
 }
