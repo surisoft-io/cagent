@@ -52,9 +52,10 @@ public class ConsulService {
         logger.debug("Registering ingress {} with Consul", ingress.getId());
         try {
             for(Meta meta : ingress.getMetaList()) {
-                logger.debug("Processing ingress metadata");
+                meta.setConsulId(ingress.getName() + "-" + ingress.getMetaList().getFirst().getGroup() + "-" + meta.getCapiInstance());
+                logger.debug("Processing ingress metadata for {}", meta.getConsulId());
                 ObjectMapper objectMapper = new ObjectMapper();
-                ingress.setId(ingress.getName() + "-" + ingress.getMetaList().getFirst().getGroup() + "-" + meta.getCapiInstance());
+                ingress.setId(meta.getConsulId());
                 ingress.setMeta(meta);
                 RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
                 logger.debug(objectMapper.writeValueAsString(ingress));
@@ -108,22 +109,28 @@ public class ConsulService {
 
     public void deregisterIngress(Ingress ingress) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
-            Request.Builder requestBuilder = new Request.Builder()
-                    .url(host + Constants.CONSUL_DEREGISTER_PATH + ingress.getId())
-                    .put(body);
-            requestBuilder.addHeader(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
-            if(token != null && !token.isEmpty()) {
-                requestBuilder.addHeader(Constants.AUTHORIZATION_HEADER, Constants.BEARER_TOKEN + token);
-            }
-            Request request = requestBuilder.build();
-            Call call = okHttpClient.newCall(request);
-            try (Response response = call.execute()) {
-                if(response.code() == 200) {
-                    logger.info("Ingress {} removed with success from Consul.", ingress.getId());
-                    ingress.setRegistered(true);
+            for(Meta meta : ingress.getMetaList()) {
+                logger.debug("Processing ingress metadata for {}", meta.getConsulId());
+                ObjectMapper objectMapper = new ObjectMapper();
+                ingress.setId(meta.getConsulId());
+                ingress.setMeta(meta);
+                RequestBody body = RequestBody.create(objectMapper.writeValueAsString(ingress), MediaType.parse(Constants.APPLICATION_JSON));
+                Request.Builder requestBuilder = new Request.Builder()
+                        .url(host + Constants.CONSUL_DEREGISTER_PATH + ingress.getId())
+                        .put(body);
+                requestBuilder.addHeader(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON);
+                if(token != null && !token.isEmpty()) {
+                    requestBuilder.addHeader(Constants.AUTHORIZATION_HEADER, Constants.BEARER_TOKEN + token);
                 }
+                Request request = requestBuilder.build();
+                Call call = okHttpClient.newCall(request);
+                try (Response response = call.execute()) {
+                    if(response.code() == 200) {
+                        logger.info("Ingress {} removed with success from Consul.", ingress.getId());
+                        ingress.setRegistered(true);
+                    }
+                }
+
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

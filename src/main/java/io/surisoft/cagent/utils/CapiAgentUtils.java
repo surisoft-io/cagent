@@ -57,7 +57,6 @@ public class CapiAgentUtils {
         ingress.setMetaList(buildMetadata(Objects.requireNonNull(Objects.requireNonNull(v1Ingress.getMetadata()).getAnnotations())));
         ingress.setName(v1Ingress.getMetadata().getName());
         ingress.setRegistered(false);
-        ingress.setId(Objects.requireNonNull(v1Ingress.getMetadata()).getName() + "-" + v1Ingress.getMetadata().getAnnotations().get(CapiAnnotations.CAPI_META_GROUP));
         return ingress;
     }
 

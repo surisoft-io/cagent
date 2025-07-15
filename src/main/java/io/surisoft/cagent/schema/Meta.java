@@ -1,5 +1,6 @@
 package io.surisoft.cagent.schema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +24,8 @@ public class Meta {
     private String subscriptionGroup;
     @JsonProperty("route-group-first")
     private String routeGroupFirst;
+    @JsonIgnore
+    private String consulId;
 
     public String getGroup() {
         return group;
@@ -102,5 +105,13 @@ public class Meta {
 
     public void setRouteGroupFirst(String routeGroupFirst) {
         this.routeGroupFirst = routeGroupFirst;
+    }
+
+    public String getConsulId() {
+        return consulId;
+    }
+
+    public void setConsulId(String consulId) {
+        this.consulId = consulId;
     }
 }
