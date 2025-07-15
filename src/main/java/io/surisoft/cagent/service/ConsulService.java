@@ -70,6 +70,8 @@ public class ConsulService {
                     if(response.code() == 200) {
                         logger.debug("Ingress {} registered with success on Consul.", ingress.getId());
                         ingress.setRegistered(true);
+                    } else {
+                        logger.error("Error registering ingress {} on Consul. Response code: {}", ingress.getId(), response.code());
                     }
                 }
             }
