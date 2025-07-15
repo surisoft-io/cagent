@@ -4,7 +4,6 @@ public class CapiAnnotations {
     public static final String CAPI_META_AWARE = "capi.meta.aware";
     public static final String CAPI_META_GROUP = "group";
     public static final String CAPI_META_INGRESS = "ingress";
-    public static final String CAPI_META_INSTANCE = "instance";
     public static final String CAPI_META_SCHEME = "scheme";
     public static final String CAPI_META_SECURED = "secured";
     public static final String CAPI_META_ROUTE_GROUP_FIRST = "route-group-first";

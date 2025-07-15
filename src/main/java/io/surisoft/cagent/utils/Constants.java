@@ -17,7 +17,6 @@ public class Constants {
     public static final String KUBERNETES_ADDED_EVENT = "ADDED";
     public static final String KUBERNETES_DELETED_EVENT = "DELETED";
     public static final String NAMESPACE = "namespace";
-    public static final String DISCOVER_SERVICES = "discoverServices";
     public static final String LOG_LEVEL = "defaultLogLevel";
     public static final String HTTPS = "https";
     public static final String HTTP = "http";
