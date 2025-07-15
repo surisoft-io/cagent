@@ -89,18 +89,30 @@ public class CapiAgentUtils {
             logger.debug(k);
             logger.debug(v.toString());
 
-            if(v.containsKey(CapiAnnotations.CAPI_META_SECURED)) {
-                meta.setSecured(v.get(CapiAnnotations.CAPI_META_SECURED));
+            if(v.containsKey("ingress")) {
+                meta.setIngress(v.get("ingress"));
             }
-            if(v.containsKey(CapiAnnotations.CAPI_META_SCHEME)) {
-                meta.setSchema(v.get(CapiAnnotations.CAPI_META_SCHEME));
+
+            if(v.containsKey("group")) {
+                meta.setGroup(v.get("group"));
             }
-            if(v.containsKey(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP)) {
-                meta.setSubscriptionGroup(v.get(CapiAnnotations.CAPI_META_SUBSCRIPTION_GROUP));
+
+            if(v.containsKey("secured")) {
+                meta.setSecured(v.get("secured"));
             }
-            if(v.containsKey(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST)) {
-                meta.setRouteGroupFirst(v.get(CapiAnnotations.CAPI_META_ROUTE_GROUP_FIRST));
+
+            if(v.containsKey("scheme")) {
+                meta.setSchema(v.get("scheme"));
             }
+
+            if(v.containsKey("subscription-group")) {
+                meta.setSubscriptionGroup(v.get("subscription-group"));
+            }
+
+            if(v.containsKey("route-group-first")) {
+                meta.setRouteGroupFirst(v.get("route-group-first"));
+            }
+
             metaList.add(meta);
         });
         return metaList;
