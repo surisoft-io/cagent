@@ -73,7 +73,7 @@ public class AgentConfiguration {
 
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-            builder.hostnameVerifier((hostname, session) -> false);
+            builder.hostnameVerifier((hostname, session) -> true);
 
             return builder.build();
         } catch (Exception e) {
