@@ -27,18 +27,20 @@ public class AgentExecutor {
     private AgentEnvironment agentEnvironment;
     private ConsulService consulService;
     private CapiAgentUtils capiAgentUtils;
+    private final ScheduledExecutorService ingressScheduler;
+
 
     public AgentExecutor(ApiClient apiClient, AgentEnvironment agentEnvironment, ConsulService consulService, CapiAgentUtils capiAgentUtils) {
         this.apiClient = apiClient;
         this.agentEnvironment = agentEnvironment;
         this.consulService = consulService;
         this.capiAgentUtils = capiAgentUtils;
+        this.ingressScheduler = createIngressScheduler();
     }
 
     public void start() {
-        logger.debug("Creating executors for ingresses with time interval of {} seconds", agentEnvironment.getExecutorExecutionInterval());
-        ScheduledExecutorService ingressConsumer = Executors.newSingleThreadScheduledExecutor();
-        ingressConsumer.scheduleAtFixedRate(
+        logger.debug("Starting ingress scheduler executor with time interval of {} seconds", agentEnvironment.getExecutorExecutionInterval());
+        ingressScheduler.scheduleAtFixedRate(
                 checkForIngresses, agentEnvironment.getExecutorInitialDelay(),
                 agentEnvironment.getExecutorExecutionInterval(),
                 TimeUnit.SECONDS);
@@ -89,5 +91,9 @@ public class AgentExecutor {
 
     private boolean registerIngress(V1ObjectMeta objectMeta) {
         return objectMeta.getAnnotations() != null && objectMeta.getAnnotations().containsKey(CapiAnnotations.CAPI_META_AWARE);
+    }
+
+    private ScheduledExecutorService createIngressScheduler() {
+        return Executors.newSingleThreadScheduledExecutor();
     }
 }
