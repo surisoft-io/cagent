@@ -42,6 +42,8 @@ public class AgentExecutor {
                     checkForIngresses, agentEnvironment.getExecutorInitialDelay(),
                     agentEnvironment.getExecutorExecutionInterval(),
                     TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
