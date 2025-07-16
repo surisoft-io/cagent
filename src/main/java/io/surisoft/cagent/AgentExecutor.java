@@ -36,15 +36,12 @@ public class AgentExecutor {
     }
 
     public void start() {
-        logger.debug("Creating executor for ingresses with time interval of {} seconds", agentEnvironment.getExecutorExecutionInterval());
-        try (ScheduledExecutorService ingressConsumer = Executors.newSingleThreadScheduledExecutor()) {
-            ingressConsumer.scheduleAtFixedRate(
-                    checkForIngresses, agentEnvironment.getExecutorInitialDelay(),
-                    agentEnvironment.getExecutorExecutionInterval(),
-                    TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        logger.debug("Creating executors for ingresses with time interval of {} seconds", agentEnvironment.getExecutorExecutionInterval());
+        ScheduledExecutorService ingressConsumer = Executors.newSingleThreadScheduledExecutor();
+        ingressConsumer.scheduleAtFixedRate(
+                checkForIngresses, agentEnvironment.getExecutorInitialDelay(),
+                agentEnvironment.getExecutorExecutionInterval(),
+                TimeUnit.SECONDS);
     }
 
     private final Runnable checkForIngresses = () -> {
